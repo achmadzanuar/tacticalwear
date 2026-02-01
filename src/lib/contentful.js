@@ -5,22 +5,14 @@ const client = createClient({
   accessToken: import.meta.env.VITE_CONTENTFUL_ACCESS_TOKEN
 })
 
-/**
- * Helper: extract plain text dari Rich Text Contentful
- */
+// helper rich text → string
 function extractText(richText) {
-  if (!richText?.content?.length) return ''
-
+  if (!richText?.content) return ''
   return richText.content
-    .map(block =>
-      block.content?.map(item => item.value || '').join('')
-    )
+    .map(b => b.content?.map(c => c.value || '').join(''))
     .join('\n')
 }
 
-/**
- * Fetch semua produk (untuk ProductList)
- */
 export async function fetchProducts() {
   try {
     const res = await client.getEntries({
@@ -37,32 +29,7 @@ export async function fetchProducts() {
       image: item.fields.image ?? ''
     }))
   } catch (err) {
-    console.error('fetchProducts error:', err)
+    console.error('Contentful error:', err)
     return []
-  }
-}
-
-/**
- * Fetch 1 produk untuk HERO
- * Gambar diambil 100% dari Contentful
- */
-export async function fetchHeroProduct() {
-  try {
-    const res = await client.getEntries({
-      content_type: 'tacticalwear',
-      limit: 1
-    })
-
-    if (!res.items.length) return null
-
-    const item = res.items[0]
-
-    return {
-      name: item.fields.name ?? '',
-      image: item.fields.image ?? ''
-    }
-  } catch (err) {
-    console.error('fetchHeroProduct error:', err)
-    return null
   }
 }
