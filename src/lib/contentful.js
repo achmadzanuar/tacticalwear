@@ -5,31 +5,28 @@ const client = createClient({
   accessToken: import.meta.env.VITE_CONTENTFUL_ACCESS_TOKEN
 })
 
-// helper rich text → string
-function extractText(richText) {
-  if (!richText?.content) return ''
-  return richText.content
-    .map(b => b.content?.map(c => c.value || '').join(''))
-    .join('\n')
-}
-
 export async function fetchProducts() {
   try {
     const res = await client.getEntries({
-      content_type: 'tacticalwear'
+      content_type: 'Tacticalwear', // ⬅️ FIX DI SINI
+      include: 2,
+      order: '-sys.createdAt'
     })
 
     return res.items.map(item => ({
       id: item.sys.id,
-      name: item.fields.name ?? '',
-      description: extractText(item.fields.descriptions),
-      price: item.fields.number ?? 0,
-      category: item.fields.category ?? '',
-      featured: item.fields.featured ?? '',
-      image: item.fields.image ?? ''
+      name: item.fields.name || '',
+      description:
+        item.fields.description?.content?.[0]?.content?.[0]?.value || '',
+      price: item.fields.price || 0,
+      category: item.fields.category || '',
+      featured: item.fields.featured || false,
+      image: item.fields.image?.fields?.file?.url
+        ? `https:${item.fields.image.fields.file.url}`
+        : null
     }))
   } catch (err) {
-    console.error('Contentful error:', err)
+    console.error('❌ Contentful error:', err)
     return []
   }
 }
