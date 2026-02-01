@@ -2,10 +2,6 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [react()],
-  base: '/',          // ⬅️ PENTING untuk EdgeOne Pages
-  build: {
-    outDir: 'dist',
-    sourcemap: false
-  }
+  base: './',        // ⬅️ INI KUNCI UTAMA
+  plugins: [react()]
 })
