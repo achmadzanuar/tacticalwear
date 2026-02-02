@@ -1,8 +1,7 @@
-import Hero from './components/Hero'
-import Why from './components/Why'
-import ProductList from './components/ProductList'
-import CTA from './components/CTA'
-import SocialProof from './components/SocialProof'
+import Hero from './components/Hero';
+import Why from './components/Why';
+import ProductList from './components/ProductList';
+import CTA from './components/CTA';
 
 export default function App() {
   return (
@@ -11,7 +10,6 @@ export default function App() {
       <Why />
       <ProductList />
       <CTA />
-      <SocialProof />
     </>
-  )
+  );
 }

@@ -1,88 +1,70 @@
-import React, { useEffect, useState } from 'react'
-import { fetchProducts } from '../lib/contentful'
+import { useEffect, useState } from 'react';
+import { fetchProducts } from '../lib/contentful';
+import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 
-function formatRupiah(price) {
-  if (!price) return '-'
-  return 'Rp' + Number(price).toLocaleString('id-ID')
-}
-
-function ProductCard({ product }) {
-  const [expanded, setExpanded] = useState(false)
-
-  return (
-    <div className={`card ${expanded ? 'expanded' : ''}`}>
-      {product.image && (
-        <img src={product.image} alt={product.name} />
-      )}
-
-      <div className="card-body">
-        <h3>{product.name}</h3>
-
-        <p className={`desc ${expanded ? 'show' : ''}`}>
-          {product.description}
-        </p>
-
-        {product.description?.length > 140 && (
-          <button
-            className="readmore"
-            onClick={() => setExpanded(!expanded)}
-          >
-            {expanded ? 'Tutup' : 'Baca selengkapnya'}
-          </button>
-        )}
-
-        <div className="meta">
-          <span className="price">{formatRupiah(product.price)}</span>
-          <span className="category">{product.category}</span>
-        </div>
-      </div>
-
-      <div className="card-footer">
-        <a
-          className="btn primary"
-          href={`https://wa.me/62813330861324?text=${encodeURIComponent(
-            `Halo URCON, saya ingin memesan ${product.name} (${formatRupiah(
-              product.price
-            )}). Apakah masih tersedia?`
-          )}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Beli via WhatsApp
-        </a>
-      </div>
-    </div>
-  )
+function rupiah(value) {
+  if (!value) return 'Rp -';
+  return 'Rp ' + Number(value).toLocaleString('id-ID');
 }
 
 export default function ProductList() {
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchProducts()
-      .then(data => {
-        data.sort((a, b) => (b.featured === true) - (a.featured === true))
-        setProducts(data)
-      })
-      .finally(() => setLoading(false))
-  }, [])
+    fetchProducts().then(data => {
+      setProducts(data);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) {
+    return <p style={{ textAlign: 'center' }}>Memuat produk...</p>;
+  }
 
   return (
     <section id="products" className="products">
       <div className="container">
         <h2>Produk Unggulan</h2>
 
-        {loading ? (
-          <p>Memuat produk...</p>
-        ) : (
-          <div className="grid">
-            {products.map(p => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
-        )}
+        <div className="grid">
+          {products.map(p => (
+            <div className="card" key={p.id}>
+              {p.image && (
+                <img src={p.image} alt={p.name} loading="lazy" />
+              )}
+
+              <div className="card-body">
+                <h3>{p.name}</h3>
+
+                {p.description && (
+                  <div className="desc">
+                    {documentToReactComponents(p.description)}
+                  </div>
+                )}
+
+                <div className="meta">
+                  <span className="price">{rupiah(p.price)}</span>
+                  <span className="category">{p.category}</span>
+                </div>
+              </div>
+
+              <div className="card-footer">
+                <a
+                  className="btn primary"
+                  href={`https://wa.me/62813330861324?text=${encodeURIComponent(
+                    `Halo URCON, saya tertarik dengan produk ${p.name}`
+                  )}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Beli via WhatsApp
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
-  )
+  );
 }

@@ -1,33 +1,36 @@
-import { createClient } from 'contentful'
+import { createClient } from 'contentful';
+
+const space = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
+const accessToken = import.meta.env.VITE_CONTENTFUL_ACCESS_TOKEN;
+
+if (!space || !accessToken) {
+  console.error('❌ Contentful ENV missing');
+}
 
 const client = createClient({
-  space: import.meta.env.VITE_CONTENTFUL_SPACE_ID,
-  accessToken: import.meta.env.VITE_CONTENTFUL_ACCESS_TOKEN,
-  environment: 'master' // ⬅️ INI KUNCI MASALAHNYA
-})
+  space,
+  accessToken,
+  environment: 'master',
+});
 
 export async function fetchProducts() {
   try {
     const res = await client.getEntries({
-      content_type: 'Tacticalwear',
-      include: 2,
-      order: '-sys.createdAt'
-    })
+      content_type: 'tacticalwear',
+      order: '-sys.createdAt',
+    });
 
     return res.items.map(item => ({
       id: item.sys.id,
-      name: item.fields.name || '',
-      description:
-        item.fields.description?.content?.[0]?.content?.[0]?.value || '',
-      price: item.fields.price || 0,
-      category: item.fields.category || '',
-      featured: item.fields.featured || false,
-      image: item.fields.image?.fields?.file?.url
-        ? `https:${item.fields.image.fields.file.url}`
-        : null
-    }))
+      name: item.fields.name ?? '',
+      description: item.fields.descriptions ?? null, // Rich Text
+      price: item.fields.number ?? 0,
+      category: item.fields.category ?? '',
+      image: item.fields.image ?? '', // STRING URL
+      featured: item.fields.featured ?? '',
+    }));
   } catch (err) {
-    console.error('❌ Contentful error:', err)
-    return []
+    console.error('❌ Contentful fetch error:', err);
+    return [];
   }
 }
